@@ -1176,7 +1176,7 @@ class Player extends EventEmitter {
                 this.queues.delete(queue.guildID)
                 // Emit end event
                 this.emit('channelEmpty', queue.firstMessage, queue)
-            }, this.options.leaveOnEmptyCooldown || 0)
+            }, 10000)
             this._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout)
         }
     }
@@ -1267,7 +1267,7 @@ class Player extends EventEmitter {
                 this.queues.delete(queue.guildID)
                 const timeout = setTimeout(() => {
                     queue.voiceConnection.channel.leave()
-                }, this.options.leaveOnEndCooldown || 0)
+                }, 10000)
                 this._cooldownsTimeout.set(`end_${queue.guildID}`, timeout)
             }
             // Remove the guild from the guilds list
