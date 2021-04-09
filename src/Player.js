@@ -12,7 +12,7 @@ const Client = new soundcloud.Client()
 const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor } = require('./Extractors/Extractor')
 
 /**
- * @typedef Filters
+ * @typedef Filters 
  * @property {boolean} [bassboost=false] Whether the bassboost filter is enabled.
  * @property {boolean} [8D=false] Whether the 8D filter is enabled.
  * @property {boolean} [vaporwave=false] Whether the vaporwave filter is enabled.
@@ -930,6 +930,70 @@ class Player extends EventEmitter {
         queue.voiceConnection.dispatcher.end()
         queue.lastSkipped = true
         // Return the queue
+        return true
+    }
+    
+    /**
+   * Jump to the song number in the queue. 
+   * @param {Discord.Message} message The message from guild channel
+   * @param {number} num The song number to play
+   * @returns {boolean} Whether it succeed or not
+   */
+    
+    jump(message, num) {
+        const queue = this.queues.find((g) => g.guildID === message.guild.id)
+        if(!queue) {
+            this.emit('error', 'NotPlaying', message)
+            return false
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit('error', 'MusicStarting', message)
+            return false
+        }
+        
+        queue.tracks = queue.tracks.splice(num - 1)
+        queue.lastSkipped = true;
+        
+        if(queue.voiceConnection.dispatcher) {
+            queue.voiceConnection.dispatcher.end()
+        }
+        
+        return true   
+    }
+
+     /**
+     * Restarts current song. 
+     * @returns {boolean} whether it succeded or not.
+     */
+    
+    restart(message) {
+        this.setPosition(message, 500)
+        
+        return true
+    }
+
+    /**
+     * Move a track from one position to another. 
+     * @param {Discord.Message} message
+     * @param {number} pos1 the number of song
+     * @param {number} pos2 the number to move it to
+     * @returns {boolean} whether it succeded or not
+     */
+    
+    move(message, pos1, pos2) {
+        const queue = this.queues.find((g) => g.guildID === message.guild.id)
+        if(!queue) {
+            this.emit('error', 'NotPlaying', message)
+            return false
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit('error', 'MusicStarting', message)
+            return false
+        }
+        
+        queue.tracks.splice(pos2 - 1, 0, queue.tracks.slice(pos1 - 1)[0])
+        queue.tracks.splice(pos1, 1)
+        
         return true
     }
 
