@@ -345,7 +345,7 @@ class Player extends EventEmitter {
             }
 
             if (queryType === 'youtube-video-keywords') {
-                await ytsr.search(updatedQuery || query, { type: 'video' }).then((results) => {
+                await ytsr.search(updatedQuery || query, { type: 'video', safeSearch: true }).then((results) => {
                     if (results && results.length !== 0) {
                         tracks = results.map((r) => new Track(r, message.author, this))
                     }
@@ -691,7 +691,7 @@ class Player extends EventEmitter {
         case 'soundcloud':
             return await Client.search(query, 'track').catch(() => {}) || []
         default:
-            return await ytsr.search(query, { type: 'video' }).catch(() => {}) || []
+            return await ytsr.search(query, { type: 'video', safeSearch: true }).catch(() => {}) || []
         }
     }
 
