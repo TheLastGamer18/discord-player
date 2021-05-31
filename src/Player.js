@@ -1209,7 +1209,7 @@ class Player extends EventEmitter {
                     encoderArgs,
                     seek: seekTime / 1000,
                     highWaterMark: 1 << 25,
-                    requestOptions: this.options.ytdlRequestOptions || {}
+                    ...this.options.ytdlRequestOptions
                 })
             } else {
                 newStream = ytdl.arbitraryStream(queue.playing.soundcloud ? await queue.playing.soundcloud.downloadProgressive() : queue.playing.stream, {
