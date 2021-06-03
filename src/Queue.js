@@ -29,6 +29,10 @@ class Queue extends EventEmitter {
          * The ytdl stream.
          * @type {any}
          */
+        this.autoPlay = false
+        /**
+         * Whether AutoPlay is enabled or not.
+         */
         this.stream = null
         /**
          * The tracks of this queue. The first one is currenlty playing and the others are going to be played.
