@@ -760,9 +760,7 @@ class Player extends EventEmitter {
                 }
             } else {
                 const queue = await this._createQueue(message, trackToPlay)
-                if(emitEvent) {
-                  this.emit('trackStart', message, queue.tracks[0], queue)
-                }
+                this.emit('trackStart', message, queue.tracks[0], queue)
             }
         }
     }
