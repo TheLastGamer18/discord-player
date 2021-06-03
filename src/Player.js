@@ -1327,7 +1327,6 @@ class Player extends EventEmitter {
                     if (queue.loopMode) queue.tracks.push(oldTrack);
                     queue.previousTracks.push(oldTrack);
                     })
-                })
             }
         }
         // if the track needs to be the next one
