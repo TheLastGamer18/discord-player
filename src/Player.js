@@ -707,7 +707,7 @@ class Player extends EventEmitter {
      * @example
      * client.player.play(message, "Despacito", true);
      */
-    async play (message, query, firstResult = false, isAttachment = false) {
+    async play (message, query, firstResult = false, emitEvent = true, isAttachment = false) {
         if (this._cooldownsTimeout.has(`end_${message.guild.id}`)) {
             clearTimeout(this._cooldownsTimeout.get(`end_${message.guild.id}`))
             this._cooldownsTimeout.delete(`end_${message.guild.id}`)
@@ -755,10 +755,14 @@ class Player extends EventEmitter {
         if (trackToPlay) {
             if (this.isPlaying(message)) {
                 const queue = this._addTrackToQueue(message, trackToPlay)
-                this.emit('trackAdd', message, queue, queue.tracks[queue.tracks.length - 1])
+                if(emitEvent) {
+                  this.emit('trackAdd', message, queue, queue.tracks[queue.tracks.length - 1])
+                }
             } else {
                 const queue = await this._createQueue(message, trackToPlay)
-                this.emit('trackStart', message, queue.tracks[0], queue)
+                if(emitEvent) {
+                  this.emit('trackStart', message, queue.tracks[0], queue)
+                }
             }
         }
     }
