@@ -1048,6 +1048,35 @@ export class Player extends EventEmitter {
 
         return this.skip(message);
     }
+    
+    /**
+     * Move a track from one position to another. 
+     * @param {Discord.Message} message
+     * @param {number} pos1 the number of song
+     * @param {number} pos2 the number to move it to
+     * @returns {boolean} whether it succeded or not
+     */
+    
+    move(message: Message, pos1: Track | number, pos2: Track | number): boolean {
+        const queue = this.getQueue(message);
+        if (!toJUMP || !queue) throw new PlayerError('Specified Track not found');
+        
+        queue.tracks.splice(pos2 - 1, 0, queue.tracks.slice(pos1 - 1)[0]);
+        queue.tracks.splice(pos1, 1);
+        
+        return true;
+    }
+    
+    /**
+     * Restarts current song. 
+     * @returns {boolean} whether it succeded or not.
+     */
+    
+    restart(message: Message): boolean {
+        this.setPosition(message, 500)
+        
+        return true
+    }
 
     /**
      * Internal method to handle VoiceStateUpdate events
