@@ -1324,7 +1324,7 @@ class Player extends EventEmitter {
                 author: {
                     name: videoData.videoDetails.author.name
                 }
-            }, message.author, this)
+            }, queue.requestedBy, this)
                 })
                 queue.tracks.push(trackToPlay)
                 if(queue.loopMode) queue.tracks.push(oldTrack)
