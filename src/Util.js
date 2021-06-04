@@ -88,4 +88,15 @@ module.exports = class Util {
         const final = parsed.filter(x => !!x).map((x) => x.toString().padStart(2, '0')).join(':')
         return final.length <= 3 ? `0:${final.padStart(2, '0') || 0}` : final
     }
+    
+    static parseMS(ms) {
+        const roundTowardsZero = milliseconds > 0 ? Math.floor : Math.ceil;
+
+        return {
+            days: roundTowardsZero(milliseconds / 86400000),
+            hours: roundTowardsZero(milliseconds / 3600000) % 24,
+            minutes: roundTowardsZero(milliseconds / 60000) % 60,
+            seconds: roundTowardsZero(milliseconds / 1000) % 60
+        }
+    }
 }
