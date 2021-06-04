@@ -566,7 +566,7 @@ class Player extends EventEmitter {
         const playlist = await spotify.getData(query)
         if (!playlist) return this.emit('noResults', message, query)
         const tracks = []
-        /*let s = 0
+        let s = 0
         for (let i = 0; i < playlist.tracks.items.length; i++) {
             const query = `${playlist.tracks.items[i].track.artists[0].name} - ${playlist.tracks.items[i].track.name}`
             const results = await ytsr.search(query, { type: 'video', limit: 1 })
@@ -579,32 +579,18 @@ class Player extends EventEmitter {
         playlist.tracks = tracks.map((item) => new Track(item, message.author))
         playlist.duration = playlist.tracks.reduce((prev, next) => prev + next.duration, 0)
         playlist.thumbnail = playlist.images[0].url
-        playlist.requestedBy = message.author*/
-        
-        tracks = playlist.tracks.items.map(async (m) => {
-            const data = new Track({
-                title: m.name,
-                description: m.description,
-                author: m.artists[0].name ? m.artists[0].name : "Unknown artist",
-                url: m.external_urls.spotify ? m.external_urls.spotify : query,
-                thumbnail: playlist.images[0].url ? playlist.images[0].url : "https://www.scdn.co/i/_global/twitter_card-default.jpg",
-                duration: Util.buildTimeCode(Util.parseMS(m.duration_ms)),
-                views: 0,
-                requestedBy: message.author,
-                fromPlaylist: true,
-            }, message.author, this)
-        })
+        playlist.requestedBy = message.author
 
         this.emit('playlistParseEnd', playlist, message)
         if (this.isPlaying(message)) {
-            const queue = this._addTracksToQueue(message, tracks)
+            const queue = this._addTracksToQueue(message, playlist.tracks)
             this.emit('playlistAdd', message, queue, playlist)
         } else {
             const track = playlist.tracks.shift()
             const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
             this.emit('playlistAdd', message, queue, playlist)
             this.emit('trackStart', message, queue.tracks[0], queue)
-            this._addTracksToQueue(message, tracks)
+            this._addTracksToQueue(message, playlist.tracks)
         }
     }
 
