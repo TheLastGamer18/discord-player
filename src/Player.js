@@ -937,6 +937,24 @@ class Player extends EventEmitter {
     }
     
     /**
+     * Toggle autoplay for youtube streams
+     * @param {DiscordMessage} message The message object
+     * @param {Boolean} enable Enable/Disable autoplay
+     * @returns {boolean}
+     */
+    
+    setAutoplay(message, bool) {
+        const queue = this.queues.find((g) => g.guildID === message.guild.id)
+        if(!queue) {
+            this.emit('error', 'NotPlaying', message)
+            return false
+        }
+        
+        queue.autoPlay = bool
+        return queue.autoPlay
+    }
+    
+    /**
    * Jump to the song number in the queue. 
    * @param {Discord.Message} message The message from guild channel
    * @param {number} num The song number to play
@@ -1263,7 +1281,7 @@ class Player extends EventEmitter {
     async _playTrack (queue, firstPlay) {
         if (queue.stopped) return
         // If there isn't next music in the queue
-        if (queue.tracks.length === 1 && !queue.loopMode && !queue.repeatMode && !firstPlay) {
+        if (!queue.autoPlay && queue.tracks.length === 1 && !queue.loopMode && !queue.repeatMode && !firstPlay) {
             // Leave the voice channel
             if (this.options.leaveOnEnd && !queue.stopped) {
                 // Remove the guild from the guilds list
@@ -1282,8 +1300,39 @@ class Player extends EventEmitter {
             // Emit end event
             return this.emit('queueEnd', queue.firstMessage, queue)
         }
+        if (queue.autoPlay && !queue.repeatMode && !firstPlay) {
+            const oldTrack = queue.tracks.shift()
+            
+            const resolveQ = this.resolveQueryType(oldTrack)
+            const info = resolveQ.startsWith('youtube') ? await ytdl.getInfo(oldTrack.url).catch((e) => {}) : null
+            if(info) {
+                const res = await ytsr.search(info.related_videos[0].title, {
+                    type: "video",
+                    safeSearch: true
+                })
+                .then(async(results) => {      
+                    const videoData = await ytdl.getBasicInfo(results[0].url)
+            if (videoData.videoDetails.isLiveContent && !this.options.enableLive) return this.emit('error', 'LiveVideo', message)
+            const lastThumbnail = videoData.videoDetails.thumbnails.length - 1 /* get the highest quality thumbnail */
+            trackToPlay = new Track({
+                title: videoData.videoDetails.title,
+                url: videoData.videoDetails.video_url,
+                views: videoData.videoDetails.viewCount,
+                thumbnail: videoData.videoDetails.thumbnails[lastThumbnail],
+                lengthSeconds: videoData.videoDetails.lengthSeconds,
+                description: videoData.videoDetails.description,
+                author: {
+                    name: videoData.videoDetails.author.name
+                }
+            }, message.author, this)
+                })
+                queue.tracks.push(trackToPlay)
+                if(queue.loopMode) queue.tracks.push(oldTrack)
+                queue.previousTracks.push(oldTrack)
+            }
+        }
         // if the track needs to be the next one
-        if (!queue.repeatMode && !firstPlay) {
+        if (!queue.autoPlay && !queue.repeatMode && !firstPlay) {
             const oldTrack = queue.tracks.shift()
             if (queue.loopMode) queue.tracks.push(oldTrack) // add the track at the end of the queue
             queue.previousTracks.push(oldTrack)
