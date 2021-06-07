@@ -369,7 +369,7 @@ class Player extends EventEmitter {
             this.emit('searchResults', message, query, tracks, collector)
 
             collector.on('collect', ({ content }) => {
-                if (!isNaN(content) && parseInt(content) >= 1 && parseInt(content) <= tracks.length) {
+                if (!isNaN(content) && parseInt(content) >= 1 && parseInt(content) <= 10) {
                     const index = parseInt(content, 10)
                     const track = tracks[index - 1]
                     collector.stop()
